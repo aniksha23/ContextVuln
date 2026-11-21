@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.pytest_cache/
+.env
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+
+# Temp cloned repos during scanning
+/tmp/
+scanned_repos/

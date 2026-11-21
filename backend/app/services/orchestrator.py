@@ -1,18 +1,38 @@
+from fastapi import UploadFile
 from app.core.schemas import ScanRequest, ScanReport, VulnerabilityFinding
-from app.services.repo_loader import validate_repo_path
+from app.services.repo_loader import load_github_repo, load_uploaded_zip
 from app.agents.intel_agent import ThreatIntelAgent
 from app.agents.ast_agent import ASTReachabilityAgent
 from app.agents.utility_agent import UtilityPrioritizationAgent
+
 
 class ScanOrchestrator:
     def __init__(self):
         self.intel_agent = ThreatIntelAgent()
         self.utility_agent = UtilityPrioritizationAgent()
 
-    async def execute_scan(self, request: ScanRequest) -> ScanReport:
-        target_dir = validate_repo_path(request.repo_path)
+    async def scan_github(self, request: ScanRequest) -> ScanReport:
+        with load_github_repo(request.repo_path) as target_dir:
+            return await self._run_pipeline(
+                target_dir=target_dir,
+                display_name=request.repo_path,
+                business_criticality=request.business_criticality,
+            )
 
-        # Step 1: Agent 2 extracts dependencies & fetches CVEs + EPSS + vulnerable symbols
+    async def scan_zip_upload(
+        self, file: UploadFile, business_criticality: float = 1.0
+    ) -> ScanReport:
+        with load_uploaded_zip(file) as target_dir:
+            return await self._run_pipeline(
+                target_dir=target_dir,
+                display_name=file.filename or "uploaded_archive.zip",
+                business_criticality=business_criticality,
+            )
+
+    async def _run_pipeline(
+        self, target_dir: str, display_name: str, business_criticality: float
+    ) -> ScanReport:
+        # Step 1: Agent 2 extracts dependencies & fetches CVEs + EPSS + symbols
         raw_vulns = await self.intel_agent.analyze_dependencies(target_dir)
 
         # Step 2: Agent 1 parses AST and builds the repository call graph
@@ -26,11 +46,11 @@ class ScanOrchestrator:
             finding = await self.utility_agent.prioritize_and_explain(
                 vuln=vuln,
                 reachability=reachability,
-                business_criticality=request.business_criticality,
+                business_criticality=business_criticality,
+                repo_path=target_dir,
             )
             findings.append(finding)
 
-        # Sort highest utility score first
         findings.sort(key=lambda f: f.utility_score, reverse=True)
 
         total = len(findings)
@@ -39,7 +59,7 @@ class ScanOrchestrator:
         noise_reduction = round((suppressed_count / total) * 100.0, 1) if total > 0 else 0.0
 
         return ScanReport(
-            repo_path=request.repo_path,
+            repo_path=display_name,
             total_cves_found=total,
             reachable_cves=reachable_count,
             suppressed_cves=suppressed_count,

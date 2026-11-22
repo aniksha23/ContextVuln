@@ -1,0 +1,66 @@
+{
+  "urllib3": {
+    "CVE-2021-33503": {
+      "symbols": [
+        "urllib3.util.url.parse_url",
+        "urllib3.util.parse_url"
+      ],
+      "needs_review": false,
+      "description": "Catastrophic ReDoS in URL authority parser"
+    },
+    "CVE-2023-43804": {
+      "symbols": [
+        "urllib3.poolmanager.PoolManager.urlopen",
+        "urllib3.connectionpool.HTTPConnectionPool.urlopen",
+        "urllib3.util.retry.Retry"
+      ],
+      "needs_review": false,
+      "description": "Cookie header not stripped on cross-origin redirects"
+    },
+    "CVE-2023-45803": {
+      "symbols": [
+        "urllib3.poolmanager.PoolManager.urlopen",
+        "urllib3.connectionpool.HTTPConnectionPool.urlopen"
+      ],
+      "needs_review": false,
+      "description": "Request body not cleared on 303 redirect"
+    },
+    "CVE-2024-37891": {
+      "symbols": [
+        "urllib3.poolmanager.ProxyManager",
+        "urllib3.connectionpool.HTTPConnectionPool.urlopen",
+        "urllib3.util.retry.Retry"
+      ],
+      "needs_review": false,
+      "description": "Proxy-Authorization header retained across redirects"
+    }
+  },
+  "pyyaml": {
+    "CVE-2020-14343": {
+      "symbols": [
+        "yaml.load",
+        "yaml.full_load"
+      ],
+      "needs_review": false,
+      "description": "Arbitrary code execution via full_load/load deserialization"
+    }
+  },
+  "requests": {
+    "CVE-2023-32681": {
+      "symbols": [
+        "requests.Session.rebuild_proxies"
+      ],
+      "needs_review": false,
+      "description": "Proxy-Authorization header leaked on redirect"
+    }
+  },
+  "setuptools": {
+    "CVE-2022-40897": {
+      "symbols": [
+        "setuptools.package_index.PackageIndex"
+      ],
+      "needs_review": false,
+      "description": "ReDoS in package_index HTML parsing"
+    }
+  }
+}

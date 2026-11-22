@@ -7,3 +7,6 @@ networkx
 packaging
 python-multipart
 pytest
+cvss
+respx
+pytest-asyncio

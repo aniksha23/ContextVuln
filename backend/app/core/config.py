@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # "mock": offline fixtures filtered by the repo's requirements.txt (demo / dev)
     # "live": Member 3's ThreatIntelAgent (OSV + EPSS + KEV)
     intel_mode: str = "mock"
+    # Dependency-exposure analysis (is a pinned package pulled in by something the app imports?)
+    # "auto" = online when intel_mode == "live", off otherwise; or force "online" / "off".
+    dep_graph_mode: str = "auto"
+    max_dep_lookups: int = 150
 
     # ---- LLM (Agent 3). Never used for math. ----
     llm_enabled: bool = True
@@ -45,6 +49,9 @@ class Settings(BaseSettings):
     conf_transitive: float = 0.7
     # Prior used when analysis is inconclusive (NEEDS_REVIEW findings)
     conf_needs_review: float = 0.5
+    # Multiplier when the advisory names no function (symbol_source == "fallback"): package is used,
+    # but we cannot show the vulnerable code path is.
+    conf_package_level: float = 0.6
 
     # ---- Business criticality is clamped into this band so it cannot dominate ----
     criticality_min: float = 0.7
@@ -71,6 +78,15 @@ class Settings(BaseSettings):
     max_compression_ratio: int = 200
     git_clone_timeout_s: int = 60
     max_jobs_kept: int = 100
+
+
+    @property
+    def dep_graph_enabled(self) -> bool:
+        if self.dep_graph_mode == "online":
+            return True
+        if self.dep_graph_mode == "off":
+            return False
+        return self.intel_mode == "live"
 
 
 settings = Settings()

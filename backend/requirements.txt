@@ -1,9 +1,10 @@
-﻿fastapi
+fastapi
 uvicorn[standard]
 httpx
 pydantic
 pydantic-settings
 networkx
+packaging
 python-multipart
 pytest
 cvss

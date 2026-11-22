@@ -70,3 +70,27 @@ Tiers: `CRITICAL_ACTION | MONITOR | LOW_RISK | NEEDS_REVIEW | SUPPRESSED_NOISE`.
 - Library-internal call graphs (real transitive reachability) - currently handled conservatively via `NEEDS_REVIEW`.
 - SQLite persistence for jobs / EPSS cache (jobs are in-memory now).
 - `benchmark/evaluate.py` and `ground_truth.json` are still empty placeholders.
+
+---
+# Update 2 - integration with Member 3's intel agent
+
+Found by running M3's agent (HTTP mocked) through the orchestrator. Fixed on the orchestrator side so nothing depends on M3 first:
+
+| Scenario | Before | After |
+|---|---|---|
+| pip-freeze file pins `requests` + `urllib3`; app imports only `requests` | urllib3 CVE **SUPPRESSED** | `NEEDS_REVIEW`, `introduced_via=["requests"]` (via PyPI `requires_dist`, `app/services/dep_graph.py`) |
+| `package-lock.json` (npm) CVEs | all **SUPPRESSED** | `NEEDS_REVIEW` "Unsupported ecosystem" |
+| `pyyaml>=5.1` style requirements | 0 CVEs, no hint | report.warnings: "N requirement line(s) NOT scanned" |
+| bare advisory symbol `parse_url` vs the app's own `parse_url()` | falsely "reachable" | suppressed (sink must belong to the package) |
+| advisory names no function (tier-d fallback) | full-confidence "reachable" | x0.6 confidence + caveat in `uncertainty_reasons` |
+| EPSS / KEV feed down | silently 0.0 / not-KEV | needs M3 patch below (orchestrator already shows `analyze_with_warnings` output) |
+
+New: `dep_graph_mode` (auto = online when INTEL_MODE=live), `conf_package_level`, `RawVulnerability.ecosystem` + `.symbol_source`, `pytest.ini`, requirements (+cvss, respx, pytest-asyncio).
+
+## Member 3: apply `member3_intel_agent.patch` (backward compatible; all 21 of your tests still pass)
+`git apply member3_intel_agent.patch`
+1. Sets `ecosystem`, `symbol_source` (tier used), `source`, `fetched_at`, `aliases`, `cvss_vector` on every RawVulnerability.
+2. New `analyze_with_warnings()` -> (vulns, warnings). Reports failed OSV lookups, EPSS/KEV outages, offline-fixture mode. `analyze_dependencies()` still works.
+3. A failed OSV lookup is no longer cached for 24h as "no vulnerabilities".
+Please also check that `app/agents/data/known_symbols.json` is committed (tier b silently does nothing without it).
+Optional next: store EPSS `percentile` (the scoring already uses `epss_percentile` when present) and pick `fixed_version` for the branch the installed version is on (currently the first `fixed` event).

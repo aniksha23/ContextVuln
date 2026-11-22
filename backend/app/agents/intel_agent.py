@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from datetime import datetime, timezone
 import hashlib
 import json
 import logging
@@ -795,6 +796,7 @@ async def query_osv_package(
     cache: DiskCache,
     dep: DependencyEntry,
     sem: asyncio.Semaphore,
+    warnings: Optional[list[str]] = None,
 ) -> list[dict[str, Any]]:
     """Query OSV.dev for a single dependency with pagination and semaphore limit."""
     cache_key = f"osv_{dep.ecosystem}_{dep.normalized_name}_{dep.version}"
@@ -824,7 +826,12 @@ async def query_osv_package(
                     "OSV query failed for %s==%s (status %s)",
                     dep.package_name, dep.version, resp.status_code if resp else "error"
                 )
-                break
+                if warnings is not None:
+                    warnings.append(
+                        f"OSV lookup failed for {dep.package_name}=={dep.version}: "
+                        f"its vulnerabilities are MISSING from this report."
+                    )
+                return vulns if vulns else []   # do not cache a failed lookup as 'no vulnerabilities'
 
             try:
                 data = resp.json()
@@ -851,6 +858,7 @@ async def fetch_epss_scores(
     client: httpx.AsyncClient,
     cache: DiskCache,
     cve_ids: list[str],
+    warnings: Optional[list[str]] = None,
 ) -> dict[str, float]:
     """Fetch EPSS scores from api.first.org in batches of 50, with caching."""
     scores: dict[str, float] = {}
@@ -873,6 +881,11 @@ async def fetch_epss_scores(
         resp = await fetch_with_retry(client, "GET", EPSS_API_URL, params=params)
         if not resp or resp.status_code != 200:
             logger.warning("EPSS lookup failed for batch: %s", batch)
+            if warnings is not None:
+                warnings.append(
+                    "EPSS data unavailable for some CVEs: exploit likelihood is treated as 0.0, "
+                    "so their priority may be UNDERSTATED."
+                )
             for cve in batch:
                 scores[cve] = 0.0
             continue
@@ -905,7 +918,9 @@ async def fetch_epss_scores(
     return scores
 
 
-async def fetch_cisa_kev(client: httpx.AsyncClient, cache: DiskCache) -> set[str]:
+async def fetch_cisa_kev(
+    client: httpx.AsyncClient, cache: DiskCache, warnings: Optional[list[str]] = None
+) -> set[str]:
     """Download CISA KEV catalog once per run, returning set of known exploited CVE IDs."""
     cached_kev = cache.get("cisa_kev_catalog", KEV_CACHE_TTL)
     if cached_kev is not None and isinstance(cached_kev, list):
@@ -914,6 +929,8 @@ async def fetch_cisa_kev(client: httpx.AsyncClient, cache: DiskCache) -> set[str
     resp = await fetch_with_retry(client, "GET", CISA_KEV_URL)
     if not resp or resp.status_code != 200:
         logger.warning("Failed to download CISA KEV catalog (status: %s)", resp.status_code if resp else "none")
+        if warnings is not None:
+            warnings.append("CISA KEV catalog unavailable: known-exploited status could not be checked.")
         return set()
 
     try:
@@ -1015,10 +1032,26 @@ class ThreatIntelAgent:
         self.known_symbols = load_known_symbols()
 
     async def analyze_dependencies(self, target_dir: str) -> list[RawVulnerability]:
+        """Backward-compatible entry point (warnings are discarded)."""
+        vulns, _ = await self.analyze_with_warnings(target_dir)
+        return vulns
+
+    async def analyze_with_warnings(self, target_dir: str) -> tuple[list[RawVulnerability], list[str]]:
+        """Same as analyze_dependencies, plus human-readable warnings the report should show
+        (failed feeds, skipped lookups). The orchestrator uses this when it exists."""
+        warnings: list[str] = []
+        vulns = await self._analyze(target_dir, warnings)
+        return vulns, warnings
+
+    async def _analyze(self, target_dir: str, warnings: list[str]) -> list[RawVulnerability]:
         """Analyze repository dependencies, fetch CVE intelligence, and return RawVulnerabilities."""
+        fetched_at = datetime.now(timezone.utc)
         # 1. Check Offline Mode
         if os.environ.get("CONTEXTVULN_OFFLINE") == "1":
             logger.info("CONTEXTVULN_OFFLINE=1 detected. Returning deterministic offline fixture.")
+            warnings.append(
+                "CONTEXTVULN_OFFLINE=1: built-in urllib3 fixtures are shown, NOT this repository's dependencies."
+            )
             return get_offline_fixtures()
 
         # 2. Extract dependencies from target_dir
@@ -1031,7 +1064,7 @@ class ThreatIntelAgent:
         sem = asyncio.Semaphore(MAX_CONCURRENT_OSV_REQUESTS)
         async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
             # Query OSV for all dependencies concurrently
-            osv_tasks = [query_osv_package(client, self.cache, dep, sem) for dep in deps]
+            osv_tasks = [query_osv_package(client, self.cache, dep, sem, warnings) for dep in deps]
             osv_results = await asyncio.gather(*osv_tasks, return_exceptions=True)
 
             # Pre-parse vulnerabilities per package
@@ -1041,6 +1074,7 @@ class ThreatIntelAgent:
             for dep, result in zip(deps, osv_results):
                 if isinstance(result, Exception):
                     logger.error("OSV lookup task raised an exception for %s: %s", dep.package_name, result)
+                    warnings.append(f"OSV lookup crashed for {dep.package_name}=={dep.version}; results missing.")
                     continue
                 if not isinstance(result, list):
                     continue
@@ -1090,14 +1124,25 @@ class ThreatIntelAgent:
                             epss_score=0.0,
                             is_in_kev=False,
                             summary=summary_text,
+                            # --- v2 contract fields used by the orchestrator's safety rules ---
+                            ecosystem=dep.ecosystem,
+                            symbol_source=tier_used,
+                            source="osv.dev",
+                            fetched_at=fetched_at,
+                            aliases=[a for a in aliases if a != cve_id],
+                            cvss_vector=next(
+                                (e["score"] for e in severity_list
+                                 if isinstance(e.get("score"), str) and e["score"].startswith("CVSS:")),
+                                None,
+                            ),
                         )
                     )
 
                 raw_vulns_per_pkg.append((dep, pkg_raw_vulns))
 
             # 4. Enrich with EPSS and CISA KEV
-            kev_task = fetch_cisa_kev(client, self.cache)
-            epss_task = fetch_epss_scores(client, self.cache, list(all_cve_ids))
+            kev_task = fetch_cisa_kev(client, self.cache, warnings)
+            epss_task = fetch_epss_scores(client, self.cache, list(all_cve_ids), warnings)
             kev_set, epss_map = await asyncio.gather(kev_task, epss_task)
 
             # 5. Merge duplicates and apply EPSS + KEV
@@ -1137,4 +1182,5 @@ class ThreatIntelAgent:
 
         # 6. Sort results by cvss_score descending
         final_vulns.sort(key=lambda item: item.cvss_score, reverse=True)
+        warnings[:] = list(dict.fromkeys(warnings))   # de-duplicate, keep order
         return final_vulns

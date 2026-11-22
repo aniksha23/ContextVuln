@@ -28,6 +28,15 @@ from app.core.schemas import (
     VulnerabilityFinding,
 )
 from app.core.scoring import explain_utility_score
+from app.services.dep_graph import (
+    Exposure,
+    RequiresProvider,
+    compute_exposure,
+    norm as norm_pkg,
+    pypi_requires_provider,
+    read_all_pins,
+    requirement_coverage_warnings,
+)
 from app.services.mock_intel import MockThreatIntelAgent
 from app.services.repo_loader import (
     load_github_repo,
@@ -72,6 +81,7 @@ class ImportIndex:
     """Which third-party roots are imported anywhere in the app, and from which files."""
     root_to_files: Dict[str, Set[str]] = field(default_factory=dict)
     file_to_roots: Dict[str, Set[str]] = field(default_factory=dict)
+    exposure: Optional[Exposure] = None   # filled by the pipeline when dependency metadata is available
 
     @classmethod
     def build(cls, ast_agent: ASTReachabilityAgent) -> "ImportIndex":
@@ -163,8 +173,10 @@ class ScanOrchestrator:
         intel_agent=None,
         utility_agent: Optional[UtilityPrioritizationAgent] = None,
         cfg: Settings = default_settings,
+        requires_provider: Optional[RequiresProvider] = None,
     ):
         self.cfg = cfg
+        self.requires_provider = requires_provider or pypi_requires_provider
         if intel_agent is not None:
             self.intel_agent = intel_agent
         elif cfg.intel_mode == "live":
@@ -263,6 +275,14 @@ class ScanOrchestrator:
                     f"into the parent package could still reach {vuln.package_name}."
                 )
                 structural = True
+            elif index.exposure is not None and (
+                not index.exposure.complete or norm_pkg(vuln.package_name) not in index.exposure.pinned
+            ):
+                reasons.append(
+                    f"Could not verify that no imported package depends on {vuln.package_name} "
+                    f"(dependency metadata incomplete), so it is not suppressed."
+                )
+                structural = True
             # else: direct dep never imported, or transitive of an unused parent -> safe to suppress
         else:
             if not state.candidate_symbols:
@@ -283,9 +303,26 @@ class ScanOrchestrator:
         self, state: CVEState, ast_agent: ASTReachabilityAgent, index: ImportIndex
     ) -> NodeName:
         """Node 1: deterministic AST reachability verification (Member 2 / Agent 1)."""
+        if (state.vuln.ecosystem or "PyPI").lower() != "pypi":
+            state.reachability = ReachabilityResult(is_reachable=False, confidence=0.0, call_path=[])
+            state.uncertainty_reasons = [
+                f"Unsupported ecosystem ({state.vuln.ecosystem}): only Python code is analysed, "
+                f"so reachability cannot be determined."
+            ]
+            state.has_uncertainty = state.structural_uncertainty = True
+            return NodeName.NEEDS_REVIEW
         symbols = state.candidate_symbols
         if symbols:
             result = await asyncio.to_thread(ast_agent.check_reachability, symbols)
+            if result.is_reachable and not self._sink_in_package(state, result):
+                # A bare advisory name (e.g. "parse_url") matched the project's OWN function of that name.
+                # Keep only package-qualified symbols and ask again.
+                roots = import_roots_for(state.vuln.package_name, [])
+                qualified = [x for x in symbols if "." in x and x.split(".")[0].lower() in roots]
+                result = (
+                    await asyncio.to_thread(ast_agent.check_reachability, qualified)
+                    if qualified else ReachabilityResult(is_reachable=False, confidence=0.0, call_path=[])
+                )
         else:
             result = ReachabilityResult(is_reachable=False, confidence=0.0, call_path=[])
         state.reachability = result
@@ -300,6 +337,15 @@ class ScanOrchestrator:
                 index, import_roots_for(state.vuln.package_name, symbols),
             )
         return self._route_after_ast(state)
+
+    @staticmethod
+    def _sink_in_package(state: CVEState, result: ReachabilityResult) -> bool:
+        """The last node of a reachable path must be a function of the vulnerable package, not app code."""
+        if not result.call_path:
+            return True
+        sink = result.call_path[-1].split("(")[0]
+        roots = import_roots_for(state.vuln.package_name, [x for x in state.candidate_symbols if "." in x])
+        return sink.split(".")[0].lower() in roots
 
     def _route_after_ast(self, state: CVEState) -> NodeName:
         if state.reachability and state.reachability.is_reachable:
@@ -329,6 +375,11 @@ class ScanOrchestrator:
     async def _node_deep_utility(self, state: CVEState, *_) -> NodeName:
         """Node 3A: confirmed reachable -> utility scoring + LLM exploit/fix analysis."""
         enriched = state.vuln.model_copy(update={"vulnerable_symbols": state.candidate_symbols})
+        if state.vuln.symbol_source == "fallback":
+            state.uncertainty_reasons.append(
+                "Advisory names no vulnerable function: 'reachable' means the package is used, "
+                "not that the vulnerable code path is."
+            )
         state.finding = await self.utility_agent.prioritize_and_explain(
             vuln=enriched,
             reachability=state.reachability,
@@ -427,11 +478,26 @@ class ScanOrchestrator:
             f.limitations = list(state.limitations)
         return f
 
+    @staticmethod
+    def _apply_exposure(vuln: RawVulnerability, index: ImportIndex) -> RawVulnerability:
+        """Marks a pinned-but-never-imported package as transitive when an imported package requires it."""
+        ex = index.exposure
+        if ex is None or index.is_imported(import_roots_for(vuln.package_name, vuln.vulnerable_symbols)):
+            return vuln
+        ancestors = ex.ancestors.get(norm_pkg(vuln.package_name), [])
+        if not ancestors:
+            return vuln
+        return vuln.model_copy(update={
+            "is_direct_dependency": False,
+            "introduced_via": sorted(set(vuln.introduced_via) | set(ancestors)),
+        })
+
     async def _evaluate_safely(
         self, vuln: RawVulnerability, target_dir: str, crit: float,
         ast_agent: ASTReachabilityAgent, index: ImportIndex,
     ) -> VulnerabilityFinding:
         """One bad CVE must never take the whole scan down: degrade it to NEEDS_REVIEW instead."""
+        vuln = self._apply_exposure(vuln, index)
         state = CVEState(
             repo_path=target_dir, business_criticality=crit, vuln=vuln,
             candidate_symbols=list(vuln.vulnerable_symbols), max_retries=self.max_retries,
@@ -457,13 +523,34 @@ class ScanOrchestrator:
 
         # Step 1: Agent 2 - dependencies, CVEs, EPSS
         self._emit(on_progress, "collecting vulnerability intelligence", 0.10)
-        raw_vulns = await self.intel_agent.analyze_dependencies(target_dir)
+        warnings: List[str] = []
+        with_warnings = getattr(self.intel_agent, "analyze_with_warnings", None)
+        if with_warnings is not None:   # optional hook: agent reports what it skipped / which feeds failed
+            raw_vulns, intel_warnings = await with_warnings(target_dir)
+            warnings.extend(intel_warnings)
+        else:
+            raw_vulns = await self.intel_agent.analyze_dependencies(target_dir)
+        warnings.extend(await asyncio.to_thread(requirement_coverage_warnings, target_dir))
 
         # Step 2: Agent 1 - build the AST call graph once (CPU bound -> worker thread)
         self._emit(on_progress, "building call graph", 0.30)
         ast_agent = ASTReachabilityAgent(target_dir)
         await asyncio.to_thread(ast_agent.build_graph)
         index = await asyncio.to_thread(ImportIndex.build, ast_agent)
+
+        # Which pinned packages are really pulled in by something the app imports?
+        if self.cfg.dep_graph_enabled and any(
+            not index.is_imported(import_roots_for(v.package_name, v.vulnerable_symbols))
+            and (v.ecosystem or "PyPI").lower() == "pypi"
+            for v in raw_vulns
+        ):
+            self._emit(on_progress, "resolving dependency graph", 0.33)
+            pins = await asyncio.to_thread(read_all_pins, target_dir)
+            imported_pins = {p for p in pins if index.is_imported(import_roots_for(p, []))}
+            index.exposure = await compute_exposure(
+                pins, imported_pins, self.requires_provider, self.cfg.max_dep_lookups
+            )
+            warnings.extend(index.exposure.notes[:3])
 
         # Step 3: cyclic state machine per CVE, bounded concurrency
         semaphore = asyncio.Semaphore(self.max_concurrency)
@@ -498,7 +585,7 @@ class ScanOrchestrator:
             needs_review_cves=tiers.get(Tier.NEEDS_REVIEW.value, 0),
             tier_counts=dict(tiers),
             files_analyzed=len(ast_agent.parsed_asts),
-            warnings=list(ast_agent.warnings)[:50],
+            warnings=(warnings + list(ast_agent.warnings))[:50],
             intel_mode=self.cfg.intel_mode,
             llm_used=self.utility_agent.llm_calls > 0,
         )

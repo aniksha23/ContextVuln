@@ -71,6 +71,10 @@ class RawVulnerability(BaseModel):
     references: List[str] = Field(default_factory=list)
     source: str = ""                                          # "osv.dev", "mock", ...
     fetched_at: Optional[datetime] = None                     # provenance timestamp
+    ecosystem: str = "PyPI"                                   # only PyPI is analysed; others -> NEEDS_REVIEW
+    # How vulnerable_symbols were found: structured | curated | heuristics | fallback.
+    # "fallback" = only the package name is known (no specific function) -> weaker evidence.
+    symbol_source: str = ""
 
 
 # ----------------------------------------------------------------------------
@@ -146,6 +150,8 @@ class VulnerabilityFinding(BaseModel):
     is_direct_dependency: bool = True
     introduced_via: List[str] = Field(default_factory=list)
     epss_percentile: Optional[float] = None
+    symbol_source: str = ""
+    ecosystem: str = "PyPI"
     data_source: str = ""
     data_fetched_at: Optional[datetime] = None
 

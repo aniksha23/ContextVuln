@@ -112,8 +112,12 @@ class UtilityPrioritizationAgent:
         repo_path: Optional[str] = None,
     ) -> VulnerabilityFinding:
         # 1. Deterministic utility score (never delegated to the LLM)
+        conf = reachability.confidence
+        package_level = reachability.is_reachable and vuln.symbol_source == "fallback"
+        if package_level:
+            conf *= self.cfg.conf_package_level
         score, tier, breakdown = explain_utility_score(
-            reachability_conf=reachability.confidence,
+            reachability_conf=conf,
             epss_score=vuln.epss_score,
             cvss_score=vuln.cvss_score,
             is_in_kev=vuln.is_in_kev,
@@ -121,6 +125,11 @@ class UtilityPrioritizationAgent:
             epss_percentile=vuln.epss_percentile,
             cfg=self.cfg,
         )
+
+        if package_level:
+            breakdown.notes.append(
+                f"Advisory names no specific function: package-level evidence only (x{self.cfg.conf_package_level})."
+            )
 
         # 2. Deterministic remediation plan (version, diff, effort, quick-win flag)
         plan = build_remediation_plan(
@@ -168,6 +177,8 @@ class UtilityPrioritizationAgent:
             remediation=plan,
             is_direct_dependency=vuln.is_direct_dependency,
             introduced_via=vuln.introduced_via,
+            symbol_source=vuln.symbol_source,
+            ecosystem=vuln.ecosystem,
             epss_percentile=vuln.epss_percentile,
             data_source=vuln.source,
             data_fetched_at=vuln.fetched_at,

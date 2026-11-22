@@ -6,3 +6,6 @@ pydantic-settings
 networkx
 python-multipart
 pytest
+cvss
+respx
+pytest-asyncio

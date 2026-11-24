@@ -1,0 +1,117 @@
+{
+  "description": "14 reachability benchmark cases across urllib3, PyYAML, and requests (7 reachable, 7 unreachable).",
+  "cases": [
+    {
+      "id": "urllib3_parse_url_reachable",
+      "cve": "CVE-2021-33503",
+      "path": "samples/case1_reachable",
+      "symbols": ["urllib3.util.url.parse_url"],
+      "reachable": true,
+      "entry_points": []
+    },
+    {
+      "id": "urllib3_parse_url_unreachable",
+      "cve": "CVE-2021-33503",
+      "path": "samples/case2_unreachable",
+      "symbols": ["urllib3.util.url.parse_url"],
+      "reachable": false,
+      "entry_points": []
+    },
+    {
+      "id": "urllib3_retry_reachable",
+      "cve": "CVE-2023-43804",
+      "path": "samples/case3_reachable",
+      "symbols": ["urllib3.util.retry.Retry"],
+      "reachable": true,
+      "entry_points": []
+    },
+    {
+      "id": "urllib3_retry_unreachable",
+      "cve": "CVE-2023-43804",
+      "path": "samples/case4_unreachable",
+      "symbols": ["urllib3.util.retry.Retry"],
+      "reachable": false,
+      "entry_points": []
+    },
+    {
+      "id": "urllib3_proxy_reachable",
+      "cve": "CVE-2024-37891",
+      "path": "samples/case5_reachable",
+      "symbols": ["urllib3.poolmanager.ProxyManager"],
+      "reachable": true,
+      "entry_points": []
+    },
+    {
+      "id": "urllib3_proxy_unreachable",
+      "cve": "CVE-2024-37891",
+      "path": "samples/case6_unreachable",
+      "symbols": ["urllib3.poolmanager.ProxyManager"],
+      "reachable": false,
+      "entry_points": []
+    },
+    {
+      "id": "urllib3_stream_reachable",
+      "cve": "CVE-2026-97689",
+      "path": "samples/case7_reachable",
+      "symbols": ["urllib3.response.HTTPResponse.read_chunked", "urllib3.response.HTTPResponse.stream", "read_chunked", "stream"],
+      "reachable": true,
+      "entry_points": []
+    },
+    {
+      "id": "urllib3_stream_unreachable",
+      "cve": "CVE-2026-97689",
+      "path": "samples/case8_unreachable",
+      "symbols": ["urllib3.response.HTTPResponse.read_chunked", "urllib3.response.HTTPResponse.stream", "read_chunked", "stream"],
+      "reachable": false,
+      "entry_points": []
+    },
+    {
+      "id": "pyyaml_full_load_reachable",
+      "cve": "CVE-2020-14343",
+      "path": "samples/case9_reachable",
+      "symbols": ["yaml.full_load"],
+      "reachable": true,
+      "entry_points": []
+    },
+    {
+      "id": "pyyaml_safe_load_unreachable",
+      "cve": "CVE-2020-14343",
+      "path": "samples/case10_unreachable",
+      "symbols": ["yaml.full_load", "yaml.load"],
+      "reachable": false,
+      "entry_points": []
+    },
+    {
+      "id": "pyyaml_load_reachable",
+      "cve": "CVE-2017-18342",
+      "path": "samples/case11_reachable",
+      "symbols": ["yaml.load"],
+      "reachable": true,
+      "entry_points": []
+    },
+    {
+      "id": "requests_session_verify_reachable",
+      "cve": "CVE-2024-35195",
+      "path": "samples/case12_reachable",
+      "symbols": ["requests.Session"],
+      "reachable": true,
+      "entry_points": []
+    },
+    {
+      "id": "requests_get_only_unreachable",
+      "cve": "CVE-2024-35195",
+      "path": "samples/case13_unreachable",
+      "symbols": ["requests.Session", "requests.Session.rebuild_proxies", "requests.Session.rebuild_auth"],
+      "reachable": false,
+      "entry_points": []
+    },
+    {
+      "id": "requests_rebuild_auth_reachable",
+      "cve": "CVE-2018-18074",
+      "path": "samples/case14_reachable",
+      "symbols": ["requests.Session.rebuild_auth"],
+      "reachable": true,
+      "entry_points": []
+    }
+  ]
+}

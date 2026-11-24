@@ -1,0 +1,135 @@
+{
+  "scope": "14 reachability benchmark cases across urllib3, PyYAML, and requests (7 reachable, 7 unreachable).",
+  "metrics": {
+    "cases": 14,
+    "true_positive": 2,
+    "false_positive": 0,
+    "true_negative": 6,
+    "false_negative": 6,
+    "alert_reduction_rate": 0.8571428571428571,
+    "precision": 1.0,
+    "false_negative_rate": 0.75,
+    "unknown": 0,
+    "decision_coverage": 1.0
+  },
+  "results": [
+    {
+      "id": "urllib3_parse_url_reachable",
+      "expected_reachable": true,
+      "status": "reachable",
+      "confidence": 1.0,
+      "call_path": [
+        "main.py:2:<module>()",
+        "urllib3.util.url.parse_url()"
+      ],
+      "retained_alert": true
+    },
+    {
+      "id": "urllib3_parse_url_unreachable",
+      "expected_reachable": false,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "urllib3_retry_reachable",
+      "expected_reachable": true,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "urllib3_retry_unreachable",
+      "expected_reachable": false,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "urllib3_proxy_reachable",
+      "expected_reachable": true,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "urllib3_proxy_unreachable",
+      "expected_reachable": false,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "urllib3_stream_reachable",
+      "expected_reachable": true,
+      "status": "reachable",
+      "confidence": 1.0,
+      "call_path": [
+        "main.py:3:consume()",
+        "resp.stream()"
+      ],
+      "retained_alert": true
+    },
+    {
+      "id": "urllib3_stream_unreachable",
+      "expected_reachable": false,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "pyyaml_full_load_reachable",
+      "expected_reachable": true,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "pyyaml_safe_load_unreachable",
+      "expected_reachable": false,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "pyyaml_load_reachable",
+      "expected_reachable": true,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "requests_session_verify_reachable",
+      "expected_reachable": true,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "requests_get_only_unreachable",
+      "expected_reachable": false,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    },
+    {
+      "id": "requests_rebuild_auth_reachable",
+      "expected_reachable": true,
+      "status": "not_observed",
+      "confidence": 0.0,
+      "call_path": [],
+      "retained_alert": false
+    }
+  ]
+}

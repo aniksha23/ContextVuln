@@ -1,0 +1,286 @@
+{
+  "id": "d64c2610-27c7-4d10-ae91-912c1ca7ca0d",
+  "mode": "demo",
+  "created_at": "2026-11-21T17:25:02.525099+00:00",
+  "project": "project",
+  "dependencies": [
+    {
+      "name": "demo-net",
+      "version": "1.0.0",
+      "ecosystem": "PyPI",
+      "manifest": "requirements.txt"
+    },
+    {
+      "name": "demo-codec",
+      "version": "2.0.0",
+      "ecosystem": "PyPI",
+      "manifest": "requirements.txt"
+    }
+  ],
+  "findings": [
+    {
+      "vulnerability": {
+        "id": "DEMO-2026-0001",
+        "aliases": [],
+        "package": "demo-net",
+        "version": "1.0.0",
+        "ecosystem": "PyPI",
+        "summary": "Unsafe redirect processing",
+        "cvss": 9.8,
+        "epss": 0.83,
+        "epss_date": null,
+        "kev": true,
+        "fixed_versions": [
+          "1.2.0"
+        ],
+        "symbols": [
+          "demo_net.fetch"
+        ],
+        "mapping_source": "Synthetic demo fixture",
+        "references": [],
+        "evidence": [
+          {
+            "source": "Synthetic fixture; not a real advisory",
+            "retrieved_at": "2026-11-21T00:00:00+00:00",
+            "status": "demo",
+            "detail": ""
+          }
+        ]
+      },
+      "reachability": {
+        "status": "reachable",
+        "confidence": 0.7,
+        "trace": [
+          {
+            "caller": "main.<module>",
+            "callee": "main.preview",
+            "file": "main.py",
+            "line": 11
+          },
+          {
+            "caller": "main.preview",
+            "callee": "demo_net.fetch",
+            "file": "main.py",
+            "line": 5
+          }
+        ],
+        "depth": 2,
+        "limitations": [
+          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled."
+        ],
+        "symbols": [
+          "demo_net.fetch"
+        ]
+      },
+      "score": 92.65,
+      "priority": "high",
+      "contributions": {
+        "severity": 29.4,
+        "exploitability": 20.75,
+        "reachability": 25.0,
+        "known_exploitation": 15.0,
+        "criticality": 2.5
+      },
+      "explanation": "DEMO-2026-0001 scores 92.65/100 (high). Reachability: reachable; CVSS: 9.8; EPSS: 0.83; KEV: True. The score is a configurable triage utility, not an exploit probability.",
+      "remediation": "Advisory fixed-version candidates: 1.2.0. Select the compatible release branch; re-query OSV for the chosen version, refresh the lockfile, run tests and review the dependency diff before merging.",
+      "review_required": [],
+      "llm_report": null
+    },
+    {
+      "vulnerability": {
+        "id": "DEMO-2026-0004",
+        "aliases": [],
+        "package": "demo-net",
+        "version": "1.0.0",
+        "ecosystem": "PyPI",
+        "summary": "Unmapped advisory requiring review",
+        "cvss": null,
+        "epss": null,
+        "epss_date": null,
+        "kev": null,
+        "fixed_versions": [],
+        "symbols": [],
+        "mapping_source": "Synthetic demo fixture",
+        "references": [],
+        "evidence": [
+          {
+            "source": "Synthetic fixture; not a real advisory",
+            "retrieved_at": "2026-11-21T00:00:00+00:00",
+            "status": "demo",
+            "detail": ""
+          }
+        ]
+      },
+      "reachability": {
+        "status": "unknown",
+        "confidence": 0.0,
+        "trace": [],
+        "depth": 0,
+        "limitations": [
+          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled.",
+          "No verified advisory-to-function mapping. Package imports alone are insufficient.",
+          "Absence of a path applies only to modeled entries and calls."
+        ],
+        "symbols": []
+      },
+      "score": 61.0,
+      "priority": "medium",
+      "contributions": {
+        "severity": 21.0,
+        "exploitability": 12.5,
+        "reachability": 17.5,
+        "known_exploitation": 7.5,
+        "criticality": 2.5
+      },
+      "explanation": "DEMO-2026-0004 scores 61.0/100 (medium). Reachability: unknown; CVSS: unknown; EPSS: unknown; KEV: unknown. The score is a configurable triage utility, not an exploit probability.",
+      "remediation": "No newer fixed version supplied by the advisory. Review maintainer guidance, restrict exposure or replace the dependency; do not invent an upgrade version.",
+      "review_required": [
+        "Confirm entry points, indirect calls and advisory-to-symbol mappings.",
+        "Retrieve missing threat data; scoring uses documented review defaults."
+      ],
+      "llm_report": null
+    },
+    {
+      "vulnerability": {
+        "id": "DEMO-2026-0002",
+        "aliases": [],
+        "package": "demo-codec",
+        "version": "2.0.0",
+        "ecosystem": "PyPI",
+        "summary": "Parser resource exhaustion",
+        "cvss": 7.5,
+        "epss": 0.12,
+        "epss_date": null,
+        "kev": false,
+        "fixed_versions": [
+          "2.1.0"
+        ],
+        "symbols": [
+          "demo_codec.decode"
+        ],
+        "mapping_source": "Synthetic demo fixture",
+        "references": [],
+        "evidence": [
+          {
+            "source": "Synthetic fixture; not a real advisory",
+            "retrieved_at": "2026-11-21T00:00:00+00:00",
+            "status": "demo",
+            "detail": ""
+          }
+        ]
+      },
+      "reachability": {
+        "status": "reachable",
+        "confidence": 0.7,
+        "trace": [
+          {
+            "caller": "main.<module>",
+            "callee": "helpers.decode_message",
+            "file": "main.py",
+            "line": 12
+          },
+          {
+            "caller": "helpers.decode_message",
+            "callee": "demo_codec.decode",
+            "file": "helpers.py",
+            "line": 4
+          }
+        ],
+        "depth": 2,
+        "limitations": [
+          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled."
+        ],
+        "symbols": [
+          "demo_codec.decode"
+        ]
+      },
+      "score": 53.0,
+      "priority": "medium",
+      "contributions": {
+        "severity": 22.5,
+        "exploitability": 3.0,
+        "reachability": 25.0,
+        "known_exploitation": 0.0,
+        "criticality": 2.5
+      },
+      "explanation": "DEMO-2026-0002 scores 53.0/100 (medium). Reachability: reachable; CVSS: 7.5; EPSS: 0.12; KEV: False. The score is a configurable triage utility, not an exploit probability.",
+      "remediation": "Advisory fixed-version candidates: 2.1.0. Select the compatible release branch; re-query OSV for the chosen version, refresh the lockfile, run tests and review the dependency diff before merging.",
+      "review_required": [],
+      "llm_report": null
+    },
+    {
+      "vulnerability": {
+        "id": "DEMO-2026-0003",
+        "aliases": [],
+        "package": "demo-codec",
+        "version": "2.0.0",
+        "ecosystem": "PyPI",
+        "summary": "Legacy decoding issue",
+        "cvss": 4.3,
+        "epss": 0.001,
+        "epss_date": null,
+        "kev": false,
+        "fixed_versions": [
+          "2.0.1"
+        ],
+        "symbols": [
+          "demo_codec.legacy_decode"
+        ],
+        "mapping_source": "Synthetic demo fixture",
+        "references": [],
+        "evidence": [
+          {
+            "source": "Synthetic fixture; not a real advisory",
+            "retrieved_at": "2026-11-21T00:00:00+00:00",
+            "status": "demo",
+            "detail": ""
+          }
+        ]
+      },
+      "reachability": {
+        "status": "not_observed",
+        "confidence": 0.0,
+        "trace": [],
+        "depth": 0,
+        "limitations": [
+          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled.",
+          "Absence of a path applies only to modeled entries and calls."
+        ],
+        "symbols": [
+          "demo_codec.legacy_decode"
+        ]
+      },
+      "score": 20.43,
+      "priority": "low",
+      "contributions": {
+        "severity": 12.9,
+        "exploitability": 0.025,
+        "reachability": 5.0,
+        "known_exploitation": 0.0,
+        "criticality": 2.5
+      },
+      "explanation": "DEMO-2026-0003 scores 20.43/100 (low). Reachability: not_observed; CVSS: 4.3; EPSS: 0.001; KEV: False. The score is a configurable triage utility, not an exploit probability.",
+      "remediation": "Advisory fixed-version candidates: 2.0.1. Select the compatible release branch; re-query OSV for the chosen version, refresh the lockfile, run tests and review the dependency diff before merging.",
+      "review_required": [
+        "Confirm entry points, indirect calls and advisory-to-symbol mappings."
+      ],
+      "llm_report": null
+    }
+  ],
+  "warnings": [
+    "DEMO: synthetic advisory IDs and threat metrics. Not current security intelligence."
+  ],
+  "files_analyzed": 2,
+  "graph_nodes": 9,
+  "graph_edges": 7,
+  "summary": {
+    "reachable": 2,
+    "not_observed": 1,
+    "unknown": 1,
+    "total": 4,
+    "high": 1,
+    "medium": 2,
+    "low": 1,
+    "alert_reduction_rate": 0.25
+  }
+}

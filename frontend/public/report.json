@@ -1,286 +1,359 @@
 {
-  "id": "d64c2610-27c7-4d10-ae91-912c1ca7ca0d",
+  "scan_id": "demo-scan-fixture-v2",
   "mode": "demo",
-  "created_at": "2026-11-21T17:25:02.525099+00:00",
-  "project": "project",
-  "dependencies": [
-    {
-      "name": "demo-net",
-      "version": "1.0.0",
-      "ecosystem": "PyPI",
-      "manifest": "requirements.txt"
-    },
-    {
-      "name": "demo-codec",
-      "version": "2.0.0",
-      "ecosystem": "PyPI",
-      "manifest": "requirements.txt"
-    }
+  "scanned_at": "2026-11-24T18:00:00+00:00",
+  "repo_path": "https://github.com/org/demo-security-service",
+  "files_analyzed": 14,
+  "graph_nodes": 48,
+  "graph_edges": 62,
+  "duration_s": 3.42,
+  "intel_mode": "mock",
+  "llm_used": true,
+  "total_cves_found": 5,
+  "reachable_cves": 2,
+  "suppressed_cves": 2,
+  "needs_review_cves": 1,
+  "noise_reduction_pct": 40.0,
+  "tier_counts": {
+    "CRITICAL_ACTION": 1,
+    "MONITOR": 1,
+    "LOW_RISK": 1,
+    "NEEDS_REVIEW": 1,
+    "SUPPRESSED_NOISE": 1
+  },
+  "warnings": [
+    "INTEL: Mock mode active. Fixtures used for demo verification.",
+    "DYNAMIC ANALYSIS: 1 module contains dynamic imports (__import__); flagged for manual verification."
   ],
   "findings": [
     {
-      "vulnerability": {
-        "id": "DEMO-2026-0001",
-        "aliases": [],
-        "package": "demo-net",
-        "version": "1.0.0",
-        "ecosystem": "PyPI",
-        "summary": "Unsafe redirect processing",
-        "cvss": 9.8,
-        "epss": 0.83,
-        "epss_date": null,
-        "kev": true,
-        "fixed_versions": [
-          "1.2.0"
-        ],
-        "symbols": [
-          "demo_net.fetch"
-        ],
-        "mapping_source": "Synthetic demo fixture",
-        "references": [],
-        "evidence": [
-          {
-            "source": "Synthetic fixture; not a real advisory",
-            "retrieved_at": "2026-11-21T00:00:00+00:00",
-            "status": "demo",
-            "detail": ""
-          }
-        ]
-      },
-      "reachability": {
-        "status": "reachable",
-        "confidence": 0.7,
-        "trace": [
-          {
-            "caller": "main.<module>",
-            "callee": "main.preview",
-            "file": "main.py",
-            "line": 11
-          },
-          {
-            "caller": "main.preview",
-            "callee": "demo_net.fetch",
-            "file": "main.py",
-            "line": 5
-          }
-        ],
-        "depth": 2,
-        "limitations": [
-          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled."
-        ],
-        "symbols": [
-          "demo_net.fetch"
-        ]
-      },
-      "score": 92.65,
-      "priority": "high",
-      "contributions": {
-        "severity": 29.4,
-        "exploitability": 20.75,
-        "reachability": 25.0,
-        "known_exploitation": 15.0,
-        "criticality": 2.5
-      },
-      "explanation": "DEMO-2026-0001 scores 92.65/100 (high). Reachability: reachable; CVSS: 9.8; EPSS: 0.83; KEV: True. The score is a configurable triage utility, not an exploit probability.",
-      "remediation": "Advisory fixed-version candidates: 1.2.0. Select the compatible release branch; re-query OSV for the chosen version, refresh the lockfile, run tests and review the dependency diff before merging.",
-      "review_required": [],
-      "llm_report": null
-    },
-    {
-      "vulnerability": {
-        "id": "DEMO-2026-0004",
-        "aliases": [],
-        "package": "demo-net",
-        "version": "1.0.0",
-        "ecosystem": "PyPI",
-        "summary": "Unmapped advisory requiring review",
-        "cvss": null,
-        "epss": null,
-        "epss_date": null,
-        "kev": null,
-        "fixed_versions": [],
-        "symbols": [],
-        "mapping_source": "Synthetic demo fixture",
-        "references": [],
-        "evidence": [
-          {
-            "source": "Synthetic fixture; not a real advisory",
-            "retrieved_at": "2026-11-21T00:00:00+00:00",
-            "status": "demo",
-            "detail": ""
-          }
-        ]
-      },
-      "reachability": {
-        "status": "unknown",
-        "confidence": 0.0,
-        "trace": [],
-        "depth": 0,
-        "limitations": [
-          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled.",
-          "No verified advisory-to-function mapping. Package imports alone are insufficient.",
-          "Absence of a path applies only to modeled entries and calls."
-        ],
-        "symbols": []
-      },
-      "score": 61.0,
-      "priority": "medium",
-      "contributions": {
-        "severity": 21.0,
-        "exploitability": 12.5,
-        "reachability": 17.5,
-        "known_exploitation": 7.5,
-        "criticality": 2.5
-      },
-      "explanation": "DEMO-2026-0004 scores 61.0/100 (medium). Reachability: unknown; CVSS: unknown; EPSS: unknown; KEV: unknown. The score is a configurable triage utility, not an exploit probability.",
-      "remediation": "No newer fixed version supplied by the advisory. Review maintainer guidance, restrict exposure or replace the dependency; do not invent an upgrade version.",
-      "review_required": [
-        "Confirm entry points, indirect calls and advisory-to-symbol mappings.",
-        "Retrieve missing threat data; scoring uses documented review defaults."
+      "cve_id": "CVE-2023-32681",
+      "package_name": "requests",
+      "installed_version": "2.25.1",
+      "fixed_version": "2.31.0",
+      "vulnerable_symbols": ["requests.sessions.Session.rebuild_auth", "requests.get"],
+      "is_reachable": true,
+      "reachability_confidence": 1.0,
+      "call_path": ["main.py:fetch_user_profile", "requests.get"],
+      "cvss_score": 8.8,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+      "epss_score": 0.8842,
+      "epss_percentile": 0.985,
+      "is_in_kev": true,
+      "utility_score": 94.5,
+      "priority_tier": "CRITICAL_ACTION",
+      "summary": "Requests Proxy-Authorization Header Leak to HTTPS Destination on Redirect",
+      "ai_reasoning": "High-risk vulnerability actively listed in CISA KEV. Direct AST reachability confirmed from entrypoint in api/routes.py:34 via requests.get(). High utility score warrants immediate patching.",
+      "remediation_advice": "Upgrade requests to 2.31.0 or newer. A unified requirements diff is available below.",
+      "is_direct_dependency": true,
+      "introduced_via": [],
+      "symbol_source": "curated",
+      "ecosystem": "PyPI",
+      "data_source": "OSV + FIRST EPSS + CISA KEV",
+      "data_fetched_at": "2026-11-24T18:00:00+00:00",
+      "call_trace": [
+        {
+          "caller": "app.api.routes.get_user_handler",
+          "callee": "app.services.client.fetch_user_profile",
+          "file": "app/api/routes.py",
+          "line": 34,
+          "call_expression": "fetch_user_profile(user_id=request.id)"
+        },
+        {
+          "caller": "app.services.client.fetch_user_profile",
+          "callee": "requests.get",
+          "file": "app/services/client.py",
+          "line": 78,
+          "call_expression": "requests.get(f'{API_URL}/profile', headers=auth_headers)"
+        }
       ],
-      "llm_report": null
-    },
-    {
-      "vulnerability": {
-        "id": "DEMO-2026-0002",
-        "aliases": [],
-        "package": "demo-codec",
-        "version": "2.0.0",
-        "ecosystem": "PyPI",
-        "summary": "Parser resource exhaustion",
-        "cvss": 7.5,
-        "epss": 0.12,
-        "epss_date": null,
-        "kev": false,
-        "fixed_versions": [
-          "2.1.0"
-        ],
-        "symbols": [
-          "demo_codec.decode"
-        ],
-        "mapping_source": "Synthetic demo fixture",
-        "references": [],
-        "evidence": [
-          {
-            "source": "Synthetic fixture; not a real advisory",
-            "retrieved_at": "2026-11-21T00:00:00+00:00",
-            "status": "demo",
-            "detail": ""
-          }
-        ]
-      },
-      "reachability": {
-        "status": "reachable",
-        "confidence": 0.7,
-        "trace": [
-          {
-            "caller": "main.<module>",
-            "callee": "helpers.decode_message",
-            "file": "main.py",
-            "line": 12
-          },
-          {
-            "caller": "helpers.decode_message",
-            "callee": "demo_codec.decode",
-            "file": "helpers.py",
-            "line": 4
-          }
-        ],
-        "depth": 2,
-        "limitations": [
-          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled."
-        ],
-        "symbols": [
-          "demo_codec.decode"
-        ]
-      },
-      "score": 53.0,
-      "priority": "medium",
-      "contributions": {
-        "severity": 22.5,
-        "exploitability": 3.0,
-        "reachability": 25.0,
-        "known_exploitation": 0.0,
-        "criticality": 2.5
-      },
-      "explanation": "DEMO-2026-0002 scores 53.0/100 (medium). Reachability: reachable; CVSS: 7.5; EPSS: 0.12; KEV: False. The score is a configurable triage utility, not an exploit probability.",
-      "remediation": "Advisory fixed-version candidates: 2.1.0. Select the compatible release branch; re-query OSV for the chosen version, refresh the lockfile, run tests and review the dependency diff before merging.",
-      "review_required": [],
-      "llm_report": null
-    },
-    {
-      "vulnerability": {
-        "id": "DEMO-2026-0003",
-        "aliases": [],
-        "package": "demo-codec",
-        "version": "2.0.0",
-        "ecosystem": "PyPI",
-        "summary": "Legacy decoding issue",
-        "cvss": 4.3,
-        "epss": 0.001,
-        "epss_date": null,
-        "kev": false,
-        "fixed_versions": [
-          "2.0.1"
-        ],
-        "symbols": [
-          "demo_codec.legacy_decode"
-        ],
-        "mapping_source": "Synthetic demo fixture",
-        "references": [],
-        "evidence": [
-          {
-            "source": "Synthetic fixture; not a real advisory",
-            "retrieved_at": "2026-11-21T00:00:00+00:00",
-            "status": "demo",
-            "detail": ""
-          }
-        ]
-      },
-      "reachability": {
-        "status": "not_observed",
-        "confidence": 0.0,
-        "trace": [],
-        "depth": 0,
-        "limitations": [
-          "Static call paths do not prove runtime exploitability; input constraints and dependency internals are not modeled.",
-          "Absence of a path applies only to modeled entries and calls."
-        ],
-        "symbols": [
-          "demo_codec.legacy_decode"
-        ]
-      },
-      "score": 20.43,
-      "priority": "low",
-      "contributions": {
-        "severity": 12.9,
-        "exploitability": 0.025,
-        "reachability": 5.0,
-        "known_exploitation": 0.0,
-        "criticality": 2.5
-      },
-      "explanation": "DEMO-2026-0003 scores 20.43/100 (low). Reachability: not_observed; CVSS: 4.3; EPSS: 0.001; KEV: False. The score is a configurable triage utility, not an exploit probability.",
-      "remediation": "Advisory fixed-version candidates: 2.0.1. Select the compatible release branch; re-query OSV for the chosen version, refresh the lockfile, run tests and review the dependency diff before merging.",
-      "review_required": [
-        "Confirm entry points, indirect calls and advisory-to-symbol mappings."
+      "search_depth": 2,
+      "limitations": [],
+      "uncertainty_reasons": [],
+      "agent_trace": [
+        "ast_check: parsed 14 files, resolved direct call from routes.py:34 -> client.py:78",
+        "threat_intel: queried OSV; CVSS 8.8; EPSS 88.4%; flagged in CISA KEV",
+        "utility_agent: MAUT utility score 94.5 (CRITICAL_ACTION floor applied via KEV)"
       ],
-      "llm_report": null
+      "score_breakdown": {
+        "epss_signal": 23.5,
+        "cvss_signal": 26.4,
+        "kev_signal": 15.0,
+        "reachability_factor": 25.0,
+        "criticality_factor": 1.0,
+        "weighted_threat": 89.9,
+        "raw_score": 94.5,
+        "floor_applied": "KEV floor (minimum 60.0 satisfied; elevated to 94.5)",
+        "notes": ["Direct call path confirmed", "CISA KEV active exploitation", "High EPSS exploit probability"]
+      },
+      "remediation": {
+        "upgrade_to": "2.31.0",
+        "upgrade_effort": "minor",
+        "requirements_diff": "--- requirements.txt\n+++ requirements.txt\n@@ -4,1 +4,1 @@\n-requests==2.25.1\n+requests==2.31.0",
+        "pr_title": "fix(deps): bump requests from 2.25.1 to 2.31.0 (CVE-2023-32681)",
+        "code_patch": null,
+        "mitigations": [
+          "Explicitly scrub Proxy-Authorization headers on external cross-domain redirects",
+          "Apply network egress controls to untrusted hosts"
+        ],
+        "version_validated": true,
+        "quick_win": true
+      }
+    },
+    {
+      "cve_id": "CVE-2021-41134",
+      "package_name": "nbconvert",
+      "installed_version": "5.6.1",
+      "fixed_version": "6.0.1",
+      "vulnerable_symbols": ["nbconvert.filters.markdown.markdown2html"],
+      "is_reachable": true,
+      "reachability_confidence": 0.7,
+      "call_path": ["cli.py:generate_report", "exporter.py:render_notebook", "nbconvert.export"],
+      "cvss_score": 8.1,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+      "epss_score": 0.0421,
+      "epss_percentile": 0.742,
+      "is_in_kev": false,
+      "utility_score": 68.2,
+      "priority_tier": "MONITOR",
+      "summary": "nbconvert Cross-Site Scripting via Untrusted Markdown Rendering",
+      "ai_reasoning": "Reachable transitive execution through report generation module. Although not currently in KEV, CVSS 8.1 warrants active monitoring and scheduled upgrade.",
+      "remediation_advice": "Upgrade nbconvert to 6.0.1. Verify notebook template customizations.",
+      "is_direct_dependency": true,
+      "introduced_via": [],
+      "symbol_source": "curated",
+      "ecosystem": "PyPI",
+      "data_source": "OSV + FIRST EPSS",
+      "data_fetched_at": "2026-11-24T18:00:00+00:00",
+      "call_trace": [
+        {
+          "caller": "app.cli.generate_report",
+          "callee": "app.reports.render_notebook",
+          "file": "app/cli.py",
+          "line": 45,
+          "call_expression": "render_notebook(nb_path, output_format='html')"
+        },
+        {
+          "caller": "app.reports.render_notebook",
+          "callee": "nbconvert.export",
+          "file": "app/reports.py",
+          "line": 112,
+          "call_expression": "exporter.from_notebook_node(nb)"
+        }
+      ],
+      "search_depth": 2,
+      "limitations": ["Transitive filter invocation occurs within template engine dispatch"],
+      "uncertainty_reasons": [],
+      "agent_trace": [
+        "ast_check: call path found across 2 jumps",
+        "threat_intel: CVSS 8.1, EPSS 4.2%",
+        "utility_agent: Prioritized into MONITOR tier"
+      ],
+      "score_breakdown": {
+        "epss_signal": 8.5,
+        "cvss_signal": 24.3,
+        "kev_signal": 0.0,
+        "reachability_factor": 17.5,
+        "criticality_factor": 1.0,
+        "weighted_threat": 50.3,
+        "raw_score": 68.2,
+        "floor_applied": null,
+        "notes": ["Reachable execution path detected"]
+      },
+      "remediation": {
+        "upgrade_to": "6.0.1",
+        "upgrade_effort": "major",
+        "requirements_diff": "--- requirements.txt\n+++ requirements.txt\n@@ -8,1 +8,1 @@\n-nbconvert==5.6.1\n+nbconvert==6.0.1",
+        "pr_title": "fix(deps): bump nbconvert from 5.6.1 to 6.0.1",
+        "code_patch": null,
+        "mitigations": ["Sanitize user input before passing to HTML report template"],
+        "version_validated": true,
+        "quick_win": false
+      }
+    },
+    {
+      "cve_id": "CVE-2023-43804",
+      "package_name": "urllib3",
+      "installed_version": "1.26.15",
+      "fixed_version": "1.26.18",
+      "vulnerable_symbols": ["urllib3.util.request.make_headers", "urllib3.PoolManager.request"],
+      "is_reachable": false,
+      "reachability_confidence": 0.4,
+      "call_path": [],
+      "cvss_score": 8.1,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+      "epss_score": 0.091,
+      "epss_percentile": 0.82,
+      "is_in_kev": false,
+      "utility_score": 58.0,
+      "priority_tier": "NEEDS_REVIEW",
+      "summary": "urllib3 Cookie Request Header Leak to Subdomains on Cross-Origin Redirect",
+      "ai_reasoning": "Transitive dependency introduced via requests. The app does not invoke urllib3 directly, but requests delegates redirect handling internally. Because library internals are not analyzed statically, safety rules classify this as NEEDS_REVIEW rather than auto-suppressing.",
+      "remediation_advice": "Update requests or pin urllib3>=1.26.18 in requirements.txt. Never auto-suppress transitive HTTP transport CVEs.",
+      "is_direct_dependency": false,
+      "introduced_via": ["requests"],
+      "symbol_source": "heuristics",
+      "ecosystem": "PyPI",
+      "data_source": "OSV + FIRST EPSS",
+      "data_fetched_at": "2026-11-24T18:00:00+00:00",
+      "call_trace": [],
+      "search_depth": 0,
+      "limitations": [
+        "Transitive package: internal call path depends on parent library (requests) runtime behavior",
+        "Absence of direct caller in app AST does NOT prove unreachable transport flow"
+      ],
+      "uncertainty_reasons": [
+        "Package is transitive (introduced via requests); AST agent only scans repository application code",
+        "Needs human review: verify whether application performs cross-domain redirects with Cookies"
+      ],
+      "agent_trace": [
+        "ast_check: no direct import of urllib3 in application code",
+        "dep_graph: resolved parent requirement 'requests' -> urllib3 is transitive dependency",
+        "safety_guard: transitive package with active parent in use CANNOT be auto-suppressed -> assigned NEEDS_REVIEW"
+      ],
+      "score_breakdown": {
+        "epss_signal": 14.5,
+        "cvss_signal": 24.3,
+        "kev_signal": 0.0,
+        "reachability_factor": 15.0,
+        "criticality_factor": 1.0,
+        "weighted_threat": 53.8,
+        "raw_score": 58.0,
+        "floor_applied": null,
+        "notes": ["Transitive dependency review default applied"]
+      },
+      "remediation": {
+        "upgrade_to": "1.26.18",
+        "upgrade_effort": "patch",
+        "requirements_diff": "--- requirements.txt\n+++ requirements.txt\n@@ -10,0 +10,1 @@\n+urllib3>=1.26.18",
+        "pr_title": "fix(deps): pin urllib3>=1.26.18 (transitive fix for requests)",
+        "code_patch": null,
+        "mitigations": ["Do not pass sensitive Cookie or Authorization headers across untrusted redirects"],
+        "version_validated": true,
+        "quick_win": true
+      }
+    },
+    {
+      "cve_id": "CVE-2022-24303",
+      "package_name": "pillow",
+      "installed_version": "8.4.0",
+      "fixed_version": "9.0.1",
+      "vulnerable_symbols": ["PIL.ImagePath.Path.map"],
+      "is_reachable": false,
+      "reachability_confidence": 0.0,
+      "call_path": [],
+      "cvss_score": 6.5,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "epss_score": 0.0008,
+      "epss_percentile": 0.21,
+      "is_in_kev": false,
+      "utility_score": 18.2,
+      "priority_tier": "SUPPRESSED_NOISE",
+      "summary": "Pillow ImagePath Buffer Over-read in Path.map Function",
+      "ai_reasoning": "Confirmed unreachable dead code. Application imports PIL.Image for thumbnail resizing; PIL.ImagePath is never imported, referenced, or called. No dynamic imports or reflection detected. Safely suppressed.",
+      "remediation_advice": "No immediate action required. Upgrade Pillow during scheduled quarterly dependency maintenance.",
+      "is_direct_dependency": true,
+      "introduced_via": [],
+      "symbol_source": "structured",
+      "ecosystem": "PyPI",
+      "data_source": "OSV + FIRST EPSS",
+      "data_fetched_at": "2026-11-24T18:00:00+00:00",
+      "call_trace": [],
+      "search_depth": 0,
+      "limitations": [
+        "Static call graph proves complete absence of PIL.ImagePath calls in all 14 project modules"
+      ],
+      "uncertainty_reasons": [],
+      "agent_trace": [
+        "ast_check: app imports PIL.Image only; PIL.ImagePath symbol is absent",
+        "dynamic_check: zero reflection/getattr on PIL modules",
+        "fast_path_suppress: safe suppression conditions verified -> SUPPRESSED_NOISE"
+      ],
+      "score_breakdown": {
+        "epss_signal": 0.2,
+        "cvss_signal": 14.0,
+        "kev_signal": 0.0,
+        "reachability_factor": 4.0,
+        "criticality_factor": 1.0,
+        "weighted_threat": 18.2,
+        "raw_score": 18.2,
+        "floor_applied": null,
+        "notes": ["Suppression confirmed: unreachable dead code"]
+      },
+      "remediation": {
+        "upgrade_to": "9.0.1",
+        "upgrade_effort": "minor",
+        "requirements_diff": "--- requirements.txt\n+++ requirements.txt\n@@ -12,1 +12,1 @@\n-Pillow==8.4.0\n+Pillow==9.0.1",
+        "pr_title": "chore(deps): upgrade Pillow to 9.0.1 (low priority)",
+        "code_patch": null,
+        "mitigations": [],
+        "version_validated": true,
+        "quick_win": false
+      }
+    },
+    {
+      "cve_id": "CVE-2022-37434",
+      "package_name": "zlib",
+      "installed_version": "1.2.11",
+      "fixed_version": "1.2.12",
+      "vulnerable_symbols": ["zlib.inflate"],
+      "is_reachable": true,
+      "reachability_confidence": 0.6,
+      "call_path": ["compression.py:decompress_payload", "zlib.decompress"],
+      "cvss_score": 4.2,
+      "cvss_vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+      "epss_score": 0.0012,
+      "epss_percentile": 0.28,
+      "is_in_kev": false,
+      "utility_score": 24.8,
+      "priority_tier": "LOW_RISK",
+      "summary": "zlib Buffer Overflow in inflate via Large Heap Input",
+      "ai_reasoning": "Reachable in local helper routine, but requires local access with low CVSS score (4.2) and low EPSS (<0.2%). Categorized as LOW_RISK for routine maintenance.",
+      "remediation_advice": "Upgrade zlib during regular base environment updates.",
+      "is_direct_dependency": true,
+      "introduced_via": [],
+      "symbol_source": "structured",
+      "ecosystem": "PyPI",
+      "data_source": "OSV + FIRST EPSS",
+      "data_fetched_at": "2026-11-24T18:00:00+00:00",
+      "call_trace": [
+        {
+          "caller": "app.utils.compression.decompress_payload",
+          "callee": "zlib.decompress",
+          "file": "app/utils/compression.py",
+          "line": 19,
+          "call_expression": "zlib.decompress(data, wbits=31)"
+        }
+      ],
+      "search_depth": 1,
+      "limitations": [],
+      "uncertainty_reasons": [],
+      "agent_trace": [
+        "ast_check: call path identified",
+        "threat_intel: CVSS 4.2, EPSS 0.12%",
+        "utility_agent: LOW_RISK tier assigned"
+      ],
+      "score_breakdown": {
+        "epss_signal": 0.5,
+        "cvss_signal": 12.6,
+        "kev_signal": 0.0,
+        "reachability_factor": 15.0,
+        "criticality_factor": 1.0,
+        "weighted_threat": 28.1,
+        "raw_score": 24.8,
+        "floor_applied": null,
+        "notes": ["Reachable but low severity"]
+      },
+      "remediation": {
+        "upgrade_to": "1.2.12",
+        "upgrade_effort": "patch",
+        "requirements_diff": "",
+        "pr_title": "chore(deps): update zlib to 1.2.12",
+        "code_patch": null,
+        "mitigations": ["Limit maximum decompressed buffer allocation size"],
+        "version_validated": true,
+        "quick_win": true
+      }
     }
-  ],
-  "warnings": [
-    "DEMO: synthetic advisory IDs and threat metrics. Not current security intelligence."
-  ],
-  "files_analyzed": 2,
-  "graph_nodes": 9,
-  "graph_edges": 7,
-  "summary": {
-    "reachable": 2,
-    "not_observed": 1,
-    "unknown": 1,
-    "total": 4,
-    "high": 1,
-    "medium": 2,
-    "low": 1,
-    "alert_reduction_rate": 0.25
-  }
+  ]
 }
